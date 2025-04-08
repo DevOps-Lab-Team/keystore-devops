@@ -1,0 +1,60 @@
+﻿services:
+  keystore-frontend:
+    image: ${DOCKERHUB_USERNAME}/keystore-frontend
+    container_name: keystore-frontend
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - keystore-backend
+    volumes:
+      - www-html:/var/www/html
+    networks:
+      - app
+  keystore-backend:
+    image: ${DOCKERHUB_USERNAME}/keystore-backend
+    container_name: keystore-backend
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: KeyStore/Dockerfile
+    ports:
+      - "16874:8080"
+    depends_on:
+      - db
+    networks:
+      - app
+  db:
+    image: postgres:latest
+    container_name: pg
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - app
+  nginx:
+    image: nginx:1.18.0-alpine
+    depends_on:
+      - keystore-frontend
+    container_name: nginx-1.18.0-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - www-html:/var/www/html
+      - /home/skoptenco/opt/nginx-conf.d:/etc/nginx/conf.d
+    networks:
+      - app
+volumes:
+  www-html:
+  db_data:
+networks:
+  app:
+    driver: bridge
