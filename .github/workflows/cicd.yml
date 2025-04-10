@@ -1,11 +1,14 @@
 name: keystore deploy apps via SSH
 
 on:
-  workflow_run:
-    workflows: ["keystore-backend CI/CD", "keystore-frontend CI/CD"]
-    branches: [ main ]
-    types:
-      - completed
+#  workflow_run:
+#    workflows: ["keystore-backend CI/CD", "keystore-frontend CI/CD"]
+#    branches: [ main ]
+#    types:
+#      - completed
+  repository_dispatch:
+    types: [trigger_workflow]
+#  workflow_dispatch:
 
 env:
   REGISTRY: docker.io
@@ -14,7 +17,7 @@ env:
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+#    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
